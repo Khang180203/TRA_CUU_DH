@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Tính Toán & Dự Đoán Khả Năng Đậu Đại Học</title>
+    <style>
+        /* --- HỆ MÀU PASTEL DỄ CHỊU VÀ THOẢI MÁI --- */
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --primary: #5dade2;       /* Xanh dương pastel dịu nhẹ */
+            --primary-hover: #3498db;
+            --secondary: #58d68d;     /* Xanh lá mint tươi mát */
+            --text-main: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border-color: #e5e8e8;
+            --shadow: 0 10px 30px rgba(0,0,0,0.04);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 30px 15px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .wrapper {
+            width: 100%;
+            max-width: 1100px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 40px;
+        }
+
+        /* --- HEADER --- */
+        header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        header h1 {
+            color: #2980b9;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        /* --- CẤU TRÚC FORM --- */
+        .form-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            background: #fafcfc;
+            padding: 30px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+            margin-bottom: 35px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: #34495e;
+        }
+
+        .form-group select, .form-group input {
+            padding: 12px 15px;
+            border: 1px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+            background-color: #fff;
+            color: var(--text-main);
+        }
+
+        .form-group select:focus, .form-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(93, 173, 226, 0.2);
+        }
+
+        .btn-container {
+            grid-column: 1 / -1;
+            margin-top: 10px;
+        }
+
+        .btn-calc {
+            width: 100%;
+            background: linear-gradient(135deg, #5dade2 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(41, 128, 185, 0.2);
+            transition: all 0.3s;
+        }
+
+        .btn-calc:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(41, 128, 185, 0.3);
+        }
+
+        /* --- KẾT QUẢ --- */
+        .result-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        .result-header {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            padding-left: 12px;
+            border-left: 5px solid var(--primary);
+            color: #2c3e50;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 15px 20px;
+        }
+
+        th {
+            background-color: #ebf5fb;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+        }
+
+        tr:hover {
+            background-color: #fcfcfc;
+        }
+
+        /* Badge Trạng thái và Điểm */
+        .badge-score {
+            font-weight: bold;
+            color: #27ae60;
+            background: #e8f8f5;
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .status-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-high { background-color: #e8f8f5; color: #117a65; }
+        .status-medium { background-color: #eaf2f8; color: #2471a3; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            font-style: italic;
+            background: #fdfefe;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Mobile */
+        @media (max-width: 768px) {
+            .wrapper { padding: 20px; }
+            header h1 { font-size: 1.7rem; }
+            .form-layout { padding: 15px; }
+            th, td { padding: 12px 10px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <header>
+        <h1>Dự Đoán Khả Năng Đậu Đại Học</h1>
+        <p>Phân tích dữ liệu, so sánh điểm chuẩn thông minh giúp tối ưu hóa nguyện vọng xét tuyển</p>
+    </header>
+
+    <!-- FORM TRÌNH NHẬP DỮ LIỆU -->
+    <form id="admissionForm" onsubmit="processAnalysis(event)">
+        <div class="form-layout">
+            
+            <!-- 1. Chọn Tổ hợp môn -->
+            <div class="form-group">
+                <label for="combination">Khối / Tổ Hợp Môn</label>
+                <select id="combination" required>
+                    <option value="A00">A00 (Toán, Lý, Hóa)</option>
+                    <option value="A01">A01 (Toán, Lý, Anh)</option>
+                    <option value="B00">B00 (Toán, Hóa, Sinh)</option>
+                    <option value="C00">C00 (Văn, Sử, Địa)</option>
+                    <option value="D01">D01 (Toán, Văn, Anh)</option>
+                </select>
+            </div>
+
+            <!-- 2. Chọn Ngành học (Hỗ trợ 46 ngành phổ biến nhất) -->
+            <div class="form-group">
+                <label for="major">Ngành Học Đăng Ký</label>
+                <select id="major" required>
+                    <option value="">-- Chọn ngành học --</option>
+                    <!-- Danh sách 46 ngành học được sinh tự động bằng Javascript -->
+                </select>
+            </div>
+
+            <!-- 3. Chọn Tỉnh/Thành (Hỗ trợ lọc theo 34 Tỉnh/Thành phố lớn) -->
+            <div class="form-group">
+                <label for="province">Tỉnh / Thành Phố</label>
+                <select id="province">
+                    <option value="all">-- Tất cả tỉnh thành --</option>
+                    <!-- Danh sách 34 tỉnh thành được sinh tự động bằng Javascript -->
+                </select>
+            </div>
+
+            <!-- 4. Nhập Điểm số -->
+            <div class="form-group">
+                <label for="score">Điểm Tổ Hợp Của Bạn</label>
+                <input type="number" id="score" min="0" max="30" step="0.01" placeholder="Ví dụ: 25.75" required>
+            </div>
+
+            <div class="btn-container">
+                <button type="submit" class="btn-calc">Bắt Đầu Phân Tích Kết Quả</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- KHU VỰC HIỂN THỊ KẾT QUẢ SẮP XẾP -->
+    <div class="result-section" id="resultContainer">
+        <h2 class="result-header">Danh Sách Các Trường Bạn Có Cơ Hội Trúng Tuyển Cao</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên Trường Đại Học</th>
+                        <th>Khu Vực</th>
+                        <th>Ngành Xét Tuyển</th>
+                        <th>Điểm Chuẩn Năm Ngoái</th>
+                        <th>Mức Chênh Lệch</th>
+                        <th>Đánh Giá Khả Năng</th>
+                    </tr>
+                </thead>
+                <tbody id="resultBody">
+                    <!-- Dữ liệu kết quả sẽ render ở đây -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Định nghĩa danh sách 34 Tỉnh thành xét tuyển phổ biến
+    const provinces = [
+        "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Ninh", "Bình Dương", "Bình Định", "Bình Phước", "Bình Thuận",
+        "Cần Thơ", "Đà Nẵng", "Đắk Lắk", "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Nội", "Hà Tĩnh", "Hải Dương", "Hải Phòng",
+        "Hậu Giang", "Khánh Hòa", "Kiên Giang", "Lâm Đồng", "Long An", "Nam Định", "Nghệ An", "Phú Thọ", "Quảng Nam",
+        "Quảng Ngãi", "Quảng Ninh", "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế", "TP. Hồ Chí Minh"
+    ];
+
+    // Định nghĩa danh sách đầy đủ 46 ngành học theo yêu cầu
+    const majors = [
+        "Công nghệ thông tin", "An toàn thông tin", "Khoa học máy tính", "Kỹ thuật phần mềm", "Hệ thống thông tin",
+        "Quản trị kinh doanh", "Marketing", "Tài chính - Ngân hàng", "Kế toán", "Kiểm toán",
+        "Kinh doanh quốc tế", "Kinh tế đối ngoại", "Logistics và Quản lý chuỗi cung ứng", "Quản trị nhân lực", "Luật kinh tế",
+        "Luật học", "Ngôn ngữ Anh", "Ngôn ngữ Hàn Quốc", "Ngôn ngữ Nhật", "Ngôn ngữ Trung Quốc",
+        "Truyền thông đa phương tiện", "Quan hệ công chúng", "Báo chí", "Thương mại điện tử", "Kỹ thuật ô tô",
+        "Kỹ thuật cơ khí", "Kỹ thuật điện", "Kỹ thuật điện tử viễn thông", "Kỹ thuật điều khiển và tự động hóa", "Kỹ thuật xây dựng",
+        "Kiến trúc", "Thiết kế đồ họa", "Công nghệ thực phẩm", "Công nghệ sinh học", "Khoa học môi trường",
+        "Y khoa", "Dược học", "Răng - Hàm - Mặt", "Điều dưỡng", "Kỹ thuật xét nghiệm y học",
+        "Sư phạm Toán học", "Sư phạm Ngữ văn", "Sư phạm Tiếng Anh", "Tâm lý học", "Du lịch và Quản lý lữ hành", "Quản trị khách sạn"
+    ];
+
+    // Tạo cơ sở dữ liệu mẫu phong phú về điểm chuẩn năm ngoái của các trường phân bổ theo ngành và tỉnh
+    const schoolDatabase = [];
+    
+    // Thuật toán tự động sinh dữ liệu thực tế cho 46 ngành x 34 tỉnh để giả lập hệ thống thật
+    const schoolPrefixes = ["Đại học Bách Khoa", "Đại học Quốc Gia", "Đại học Sư Phạm", "Đại học Kinh Tế", "Đại học Khoa Học", "Đại học Kỹ Thuật", "Đại học Công Nghệ", "Đại học Ngoại Thương", "Đại học Y Dược"];
+    
+    // Tạo khoảng 150 trường học giả lập phân bố khắp các tỉnh và các ngành
+    for (let i = 0; i < 150; i++) {
+        const province = provinces[i % provinces.length];
+        const prefix = schoolPrefixes[i % schoolPrefixes.length];
+        const schoolName = `${prefix} cơ sở ${province}`;
+        
+        // Mỗi trường đào tạo ngẫu nhiên một số ngành trong danh sách 46 ngành
+        for (let j = 0; j < 6; j++) {
+            const majorIdx = (i + j * 7) % majors.length;
+            // Tạo điểm chuẩn ngẫu nhiên từ 18.00 đến 27.50
+            const lastYearScore = parseFloat((18 + Math.random() * 9.5).toFixed(2));
+            
+            schoolDatabase.push({
+                name: schoolName,
+                province: province,
+                major: majors[majorIdx],
+                lastYearScore: lastYearScore
+            });
+        }
+    }
+
+    // Khởi tạo và chèn dữ liệu vào Dropdown khi trang tải xong
+    document.addEventListener("DOMContentLoaded", () => {
+        const majorSelect = document.getElementById("major");
+        const provinceSelect = document.getElementById("province");
+
+        // Đổ dữ liệu 46 ngành vào select
+        majors.sort().forEach(m => {
+            const opt = document.createElement("option");
+            opt.value = m;
+            opt.textContent = m;
+            majorSelect.appendChild(opt);
+        });
+
+        // Đổ dữ liệu 34 tỉnh thành vào select
+        provinces.sort().forEach(p => {
+            const opt = document.createElement("option");
+            opt.value = p;
+            opt.textContent = p;
+            provinceSelect.appendChild(opt);
+        });
+    });
+
+    // Hàm xử lý thuật toán tính toán và đối sánh điểm số
+    function processAnalysis(event) {
+        event.preventDefault();
+
+        const selectedMajor = document.getElementById("major").value;
+        const selectedProvince = document.getElementById("province").value;
+        const userScore = parseFloat(document.getElementById("score").value);
+
+        // BƯỚC 1: Lọc danh sách theo ngành và tỉnh (nếu chọn cụ thể)
+        // YÊU CẦU: Điểm chuẩn năm ngoái phải THẤP HƠN HOẶC BẰNG điểm thí sinh nhập vào (User Score >= Trường công bố)
+        let matchedSchools = schoolDatabase.filter(school => {
+            if (school.major !== selectedMajor) return false;
+            if (selectedProvince !== "all" && school.province !== selectedProvince) return false;
+            return userScore >= school.lastYearScore;
+        });
+
+        // BƯỚC 2: Tính toán độ chênh lệch điểm
+        matchedSchools = matchedSchools.map(school => {
+            const diff = parseFloat((userScore - school.lastYearScore).toFixed(2));
+            return { ...school, diff: diff };
+        });
+
+        // BƯỚC 3: SẮP XẾP THEO YÊU CẦU
+        // Sắp xếp từ CAO tới THẤP dựa vào điểm chênh lệch (Điểm chênh lệch càng lớn cơ hội đậu càng cao)
+        matchedSchools.sort((a, b) => b.diff - a.diff);
+
+        // BƯỚC 4: Hiển thị kết quả lên giao diện người dùng
+        const resultContainer = document.getElementById("resultContainer");
+        const resultBody = document.getElementById("resultBody");
+
+        resultContainer.style.display = "block";
+        resultBody.innerHTML = "";
+
+        if (matchedSchools.length === 0) {
+            resultBody.innerHTML = `<tr><td colspan="6" class="empty-state">Rất tiếc! Không tìm thấy trường nào có điểm chuẩn năm ngoái thấp hơn điểm số hiện tại của bạn trong ngành này. Hãy thử chọn một ngành học khác hoặc mở rộng khu vực tìm kiếm nhé.</td></tr>`;
+            return;
+        }
+
+        // Render dữ liệu vào Table
+        matchedSchools.forEach(school => {
+            let statusTag = '';
+            if (school.diff >= 3.0) {
+                statusTag = `<span class="status-tag status-high">Cơ hội rất lớn (+${school.diff})</span>`;
+            } else {
+                statusTag = `<span class="status-tag status-medium">Cơ hội an toàn (+${school.diff})</span>`;
+            }
+
+            const row = `
+                <tr>
+                    <td style="font-weight: 600; color: #2c3e50;">${school.name}</td>
+                    <td>${school.province}</td>
+                    <td>${school.major}</td>
+                    <td><span style="background: #f2f4f4; padding: 4px 8px; border-radius: 4px; font-weight: 500;">${school.lastYearScore}</span></td>
+                    <td><span class="badge-score">+${school.diff} đ</span></td>
+                    <td>${statusTag}</td>
+                </tr>
+            `;
+            resultBody.innerHTML += row;
+        });
+        
+        // Tự động cuộn mượt xuống khu vực kết quả sau khi bấm phân tích
+        resultContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
